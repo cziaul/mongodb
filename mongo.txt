@@ -2,6 +2,13 @@ Installtion Instruction
 -----------------------
 https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
 
+/etc/mongod.conf -->change
+bindIp: 10.0.0.144
+
+
+https://mongodb.github.io/mongo-java-driver/4.1/driver/getting-started/quick-start-pojo/
+
+
 sudo systemctl start mongod
 
 mongod --port 27017 --dbpath /var/lib/mongodb
@@ -28,6 +35,9 @@ mongo --port 27017
 
   dbPath: /home/student/mongo/data
   path: /var/log/mongodb/mongod.log
+
+Mongo Driver
+
 
 
 
