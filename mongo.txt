@@ -1,0 +1,57 @@
+Installtion Instruction
+-----------------------
+https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
+
+sudo systemctl start mongod
+
+mongod --port 27017 --dbpath /var/lib/mongodb
+
+mongod --port 27017 --dbpath ~/mongo/db/data
+
+
+verify
+
+sudo systemctl status mongod
+
+stop
+
+sudo systemctl stop mongod
+
+re-start
+
+sudo systemctl restart mongod
+
+connect
+
+mongo --port 27017
+
+
+  dbPath: /home/student/mongo/data
+  path: /var/log/mongodb/mongod.log
+
+
+
+use admin
+db.createUser(
+  {
+    user: "student",
+    pwd: passwordPrompt(), // or cleartext password
+    roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
+  }
+)
+
+db.createUser(
+    {
+      user: "mongoAdmin",
+      pwd: "student",
+      roles: [ "readWrite", "dbAdmin" ]
+    }
+)
+
+db.createCollection("yourCollectionName");
+
+db.getCollectionNames();
+
+use admin
+
+db.createUser({user: "root", pwd: "12345", roles:["root"]})
