@@ -1,3 +1,4 @@
+//Insert
 db.flightData.insertOne({
     "departureAirport": "MUC",
     "arrivalAirport": "SFO",
@@ -23,7 +24,6 @@ db.flightData.insertOne({
   ) 
   
   
-  
   db.flightData.insertOne({
     "departureAirport": "TXL",
     "arrivalAirport": "LHR",
@@ -35,147 +35,121 @@ db.flightData.insertOne({
     "arrivalAirport": "LHR"
   })
   
+//Delete
 db.flightData.deleteOne({departureAirport: "TXL"})
-    
-db.flightData.update({distance: 12000}, {$set: {marker: "delete"}})
 
-db.flightData.updateMany({}, {$set: {marker: "toDelete"}})
 db.flightData.deleteMany({marker: "toDelete"})
+
+//Will delete all in flightData
 db.flightData.deleteMany({})
 
-db.flightData.find().pretty()
+/***** Find   ****/
 
+db.flightData.find().pretty()
 db.flightData.find({intercontinental: true}).pretty()
 db.flightData.find({distance: {$gt: 1000}}).pretty()
 db.flightData.find({distance: {$gt: 900}}).pretty()
 
-db.flightData.updateOne({_id: ObjectId("5fc3190d46841a3710c93849")},{$set: {delayed: true}})
-db.flightData.update({_id: ObjectId("5fc3190d46841a3710c93849")},{delayed: false})
-db.flightData.replaceOne({_id: ObjectId("5fc3190d46841a3710c93849")}, { "departureAirport": "MUC",
-    "arrivalAirport": "SFO",
-    "aircraft": "Airbus A380",
-    "distance": 12000,
-    "intercontinental": true})
-    
-//Passengers
-db.passengers.insertMany( [
-  {
-    "name": "Max Schwarzmueller",
-    "age": 29
-  },
-  {
-    "name": "Manu Lorenz",
-    "age": 30
-  },
-  {
-    "name": "Chris Hayton",
-    "age": 35
-  },
-  {
-    "name": "Sandeep Kumar",
-    "age": 28
-  },
-  {
-    "name": "Maria Jones",
-    "age": 30
-  },
-  {
-    "name": "Alexandra Maier",
-    "age": 27
-  },
-  {
-    "name": "Dr. Phil Evans",
-    "age": 47
-  },
-  {
-    "name": "Sandra Brugge",
-    "age": 33
-  },
-  {
-    "name": "Elisabeth Mayr",
-    "age": 29
-  },
-  {
-    "name": "Frank Cube",
-    "age": 41
-  },
-  {
-    "name": "Karandeep Alun",
-    "age": 48
-  },
-  {
-    "name": "Michaela Drayer",
-    "age": 39
-  },
-  {
-    "name": "Bernd Hoftstadt",
-    "age": 22
-  },
-  {
-    "name": "Scott Tolib",
-    "age": 44
-  },
-  {
-    "name": "Freddy Melver",
-    "age": 41
-  },
-  {
-    "name": "Alexis Bohed",
-    "age": 35
-  },
-  {
-    "name": "Melanie Palace",
-    "age": 27
-  },
-  {
-    "name": "Armin Glutch",
-    "age": 35
-  },
-  {
-    "name": "Klaus Arber",
-    "age": 53
-  },
-  {
-    "name": "Albert Twostone",
-    "age": 68
-  },
-  {
-    "name": "Gordon Black",
-    "age": 38
-  }
-]
-)
+//Note: pretty() not supported in findOne
+
+/*
+* Find gives us first 20 recrod and cursor, we need to type it to get next 20
+* 
+*/
+
+db.flightData.find({})
+
+db.flightData.find({intercontinental: true})
+
 db.passengers.find().pretty() //will give first 20 by default
 
-db.passengers.find().toArray()  //will show all data
+//to Array will give all data
+
+db.passengers.find().toArray()  
 
 //db.passengers.find().forEach() find gives multiple documents and cursor 
 
 db.passengers.find().forEach((passengerData) => {printjson(passengerData)})
 
+db.passengers.find({age: 29.0, name: "Max Schwarzmueller"}).forEach((passengers) => {printjson(passengers)})
 
-//projection (when we don't need all fields)
+db.passengers.find({age: 29.0, name: "Max Schwarzmueller"}).forEach((passengers) => {printjson(passengers)}).toArray??
 
-//looking for name
-db.passengers.find({}, {name: 1}).pretty()
-
-//since id comes by default, we need to exclusively exclude id
-
-db.passengers.find({}, {name: 1, _id: 0}).pretty()
-
-//Embadded Document
-
-db.flightData.updateMany({}, {$set: {status: {description: "on-time", lastUpdated: "1 hour ago"}}})
-
-db.flightData.find().pretty()
+db.flightData.find({_id: ObjectId("5fd5adf821d80622917ce0a8")}).pretty()
 
 //One more nested doc
 
 db.flightData.updateMany({}, {$set: {status: {description: "on-time", lastUpdated: "1 hour ago", details: {responsible: "a person"}}}})
 
+
+/**projection (when we don't need all fields)*
+ Happens before data shifts to the program 
+ So this is fast
+*/
+
+//looking for name
+db.passengers.find({hobbiles: "sports"}, {name: 1}).pretty()
+
+//since id comes by default, we need to exclusively exclude id
+
+db.passengers.find({}, {name: 1, _id: 0}).pretty()
+
+db.passengers.find({}, {name: 1, age: 1,_id: 0}).pretty()
+
+db.flightData.find({})
+
+db.flightData.find({"status.description": "on-time"}, {"status.description": 1, "status.lastUpdated": 1, _id: 0})
+
+
+/***** Update   ****/
+/*
+Difference between update and updateMany or updateOne is $set
+update will work without $set but it will overwrite all other nodes
+*/
+db.flightData.find().pretty()
+
+db.flightData.updateOne({_id: ObjectId("5fd5adf821d80622917ce0a8")}, {$set: {delayed: true}})
+
+db.flightData.update({_id: ObjectId("5fd5adf821d80622917ce0a8")}, {$set: {delayed: false}})
+
+//will overwrite all node and keep only node defined with update
+db.flightData.update({_id: ObjectId("5fd5adf821d80622917ce0a8")}, {delayed: false})
+
+//Will add marker node if not availabe but if available will update    
+db.flightData.update({distance: 12000}, {$set: {marker: "delete"}})
+
+//see MT to update all
+db.flightData.updateMany({}, {$set: {marker: "toDelete"}})
+
+
+//replaceOne
+
+db.flightData.replaceOne({_id: ObjectId("5fd5adf821d80622917ce0a8")}, {
+    "departureAirport": "MUC",
+    "arrivalAirport": "SFO",
+    "aircraft": "Airbus A380",
+    "distance": 12000,
+    "intercontinental": true
+})
+
+//will replace all nodes but in the query
+db.flightData.replaceOne({_id: ObjectId("5fd5adf821d80622917ce0a8")}, {
+    "distance": 13000,
+    "intercontinental": true
+})
+
+//Embadded Document
+db.flightData.find().pretty()
+
+db.flightData.updateMany({}, {$set: {status: {description: "on-time", lastUpdated: "1 hour ago"}}})
+
+//Array
+
 //Working with Arrays
 db.passengers.find().pretty()
+//Hobbies now list of doc
 db.passengers.updateOne({name: "Albert Twostone"}, {$set: {hobbiles: ["sports", "cooking"]}})
+db.passengers.find({name: "Albert Twostone"}).pretty()
 
 //Accessing Structured Data
 
@@ -192,6 +166,11 @@ db.flightData.find({"status.description": "on-time"}).pretty()
 //Go one more
 
 db.flightData.find({"status.details.responsible": "a person"}).pretty()
+
+db.flightData.find({distance: {$gt: 10000}}).pretty()
+
+
+
 
 use companyData
 db.companies.insertOne({name: "FreshApple Inc",
@@ -220,6 +199,12 @@ db.companies.insertOne({name: "FreshApple Inc",
  
  db.stats()            
                             
+//Passengers
+
+db.passengers.find().pretty()
+
+
+
 
 
 

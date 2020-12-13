@@ -1,0 +1,4 @@
+- Database base will be shown when data is there
+- Behind the screen Mongo uses BSON, faster and size lesser
+
+
