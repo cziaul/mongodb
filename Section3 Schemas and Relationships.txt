@@ -1,0 +1,32 @@
+/*How to Structure documents
+  Mongo DB doesn't care about schema but in reality we might have some kind of schema
+  
+*/
+
+//To delete all
+
+db.products.deleteMany({})
+
+db.products.insertOne({name: "A Book", price: 12.99})
+
+db.products.insertOne({name: "A T-Shirt", price: 12.99})
+
+db.products.find().pretty()
+
+db.products.insertOne({name: "A T-Shirt", price: 12.99})
+
+db.products.insertOne({name: "A T-Shirt", price: 12.99, details: {cpu: "Intel i7 8770"}})
+
+db.products.updateOne({_id: ObjectId("5fd6de2c3fb087a948a7814f")}, {$set: {price: 1200}})
+
+//Data type in Mongo
+
+/* 
+ * Text, Boolean, Integer(int32), Numberlong(int64), NumberDecimal, ObjectId("ddjfkdjfeirue"}
+ * ISODate, Timestamp (used internally), Embadded Document{}, Array[]
+ */
+ //To drop a database
+ use test
+ db.dropDatabase()
+ 
+ 
