@@ -7,17 +7,17 @@
 
 db.products.deleteMany({})
 
-db.products.insertOne({name: "A Book", price: 12.99})
+db.products.insertOne({ name: "A Book", price: 12.99 })
 
-db.products.insertOne({name: "A T-Shirt", price: 12.99})
+db.products.insertOne({ name: "A T-Shirt", price: 12.99 })
 
 db.products.find().pretty()
 
-db.products.insertOne({name: "A T-Shirt", price: 12.99})
+db.products.insertOne({ name: "A T-Shirt", price: 12.99 })
 
-db.products.insertOne({name: "A T-Shirt", price: 12.99, details: {cpu: "Intel i7 8770"}})
+db.products.insertOne({ name: "A T-Shirt", price: 12.99, details: { cpu: "Intel i7 8770" } })
 
-db.products.updateOne({_id: ObjectId("5fd6de2c3fb087a948a7814f")}, {$set: {price: 1200}})
+db.products.updateOne({ _id: ObjectId("5fd6de2c3fb087a948a7814f") }, { $set: { price: 1200 } })
 
 //Data type in Mongo
 
@@ -25,8 +25,333 @@ db.products.updateOne({_id: ObjectId("5fd6de2c3fb087a948a7814f")}, {$set: {price
  * Text, Boolean, Integer(int32), Numberlong(int64), NumberDecimal, ObjectId("ddjfkdjfeirue"}
  * ISODate, Timestamp (used internally), Embadded Document{}, Array[]
  */
- //To drop a database
- use test
- db.dropDatabase()
- 
- 
+//To drop a database
+use test
+db.dropDatabase()
+
+db.companies.insertOne({
+    name: "Fresh Applice Inc", isStartup: true, employees: 33, funding: 12345678901234567890,
+    details: { ceo: "Mark Super" }, tags: [{ title: "super" }, { title: "perfect" }],
+    foundingDate: new Date(), insertedAt: new Timestamp()
+})
+
+db.companies.find({})
+
+
+
+/*
+
+https://mongodb.github.io/mongo-java-driver/4.1/driver/
+
+Api Documentation
+
+https://mongodb.github.io/mongo-java-driver/4.1/apidocs/
+*/
+//Shows how many collections, objects, datasize and others
+
+db.stats()
+db.numbers.insertOne({ a: 1 })
+typeof db.numbers.findOne().a //Number
+//Shows type of the node
+typeof db.companies.findOne().details
+
+//One to One Relationship using Embadded Document
+
+use hospital
+db.patients.insertOne({ name: "Max", age: 29, diseaseSummary: "Summary-max-1" })
+
+db.patients.findOne()
+
+db.diseaseSummary.insertOne({ _id: "Summary-max-1", diseases: ["cold", "broken leg"] })
+db.diseaseSummary.findOne()
+
+//Getting disease Summary
+
+var dsid = db.patients.findOne().deseaseSummary
+dsid
+//db.diseaseSummary.findOne({_id: dsid}) but this would have 2 step process
+db.diseaseSummary.findOne({ _id: "Summary-max-1" })
+
+//Best approch (1 to 1)
+
+db.patients.insertOne({ name: "Max", age: 29, diseaseSummary: { diseases: ["cold", "broken leg"] } })
+
+db.patients.find({})
+
+//One to One Relationship using References
+//Person with Car
+
+use cardData
+
+db.person.insertOne({ name: "Max", car: { model: "BMW", price: 40000 } })
+
+db.person.find()
+
+db.person.deleteMany({}) //to use it below
+//In case we are only interest on car seperate both
+
+db.persons.insertOne({ name: "Max", age: 29, slaary: 30000 })
+
+db.car.insertOne({ model: "BMW", price: 40000, owner: ObjectId("5fd949302839541cc778f5d5") })
+db.car.find()
+
+//Clear it out
+
+db.car.deleteMany({})
+db.persons.deleteMany({})
+
+//One to Many --Embedded
+// Use Case: One Question has many Ans
+
+db.questionThreads.insertOne({ creator: "Max", question: "How does that all work", answer: ["q1a1", "q1a2"] })
+db.questionThreads.find()
+
+db.answers.insertMany([{ _id: "q1a1", text: "This works well" }, { _id: "q1a2", text: "This doesn't work well" }])
+db.answers.find()
+
+//Clearning 
+db.questionThreads.deleteMany({})
+
+//But for above, we need to call twice 
+// We can use Embadded way
+
+db.questionsThreads.insertOne({ creator: "Max", question: "This works well?", answers: [{ text: "This works well" }, { text: "This doesn't work well" }] })
+
+db.questionsThreads.findOne()
+
+//One to Many - Using References
+//One city many have many citizen, so if we put in one collection, this may go beyond 16MB limit, which is not permitted
+
+//So here is solution
+
+use CityData
+
+db.cities.insertOne({ name: "NewYork", coordinates: { lat: 21, lng: 55 } })
+
+db.citizens.insertMany([{ name: "Ziaul Chowdhury", cityId: ObjectId("5fd951062839541cc778f5d9") }, { name: "Parvin Sultana", cityId: ObjectId("5fd951062839541cc778f5d9") }])
+
+db.citizens.find()
+
+//Clean
+
+db.citizens.deleteMany({})
+db.cities.deleteMany({})
+
+
+//Many to Many
+// A customer may buy multiple products and a products can be brought by multiple customer
+
+//SQL Way
+
+db.products.insertOne({ title: "A Book", price: 20.00 })
+db.products.find()
+
+db.customers.insertOne({ name: "Max", age: 29 })
+db.customers.find()
+
+db.orders.insertOne({ productId: ObjectId("5fd95a2f2839541cc778f5dc"), customerId: ObjectId("5fd95a512839541cc778f5dd") })
+db.orders.find()
+
+//Drpping Orders
+
+db.orders.drop()
+
+//Solution1 MongoDB way. Since Customer is main here we can add reference productId in customer
+
+db.customers.updateOne({}, { $set: { orders: [{ productId: ObjectId("5fd95a2f2839541cc778f5dc"), Qty: 10 }] } })
+db.customers.find()
+
+db.customers.deleteMany({})
+
+//Solution2 to embadded document (customer with orders without reference //but DATA DUPLICATION since same title and price can be other orders as well
+// AND if we change price and title we need to do it for all customers who has same title
+
+db.customers.updateOne({}, { $set: { orders: [{ title: "A Book", price: 20.00, qty: 2 }] } })
+db.customers.find()
+
+
+/*
+Relations Option 1) Nested/Embadded Documents 2) References
+
+*/
+
+//USING lookup() for merging reference relations
+//4 elements needs tobe passed e.g. from, localField, foreignField, as
+
+db.orders.findOne()
+
+db.orders.aggregate([{ $lookup: { from: "products", localField: "productId", foreignField: "_id", as: "products" } }])
+
+//Adding Collection Document Validation
+
+
+db.createCollection("posts", {
+	validator: {
+		$jsonSchema : {
+			bsonType : "object",
+			required : [ "title", "text", "creator", "comment" ],
+			properties: {
+				title: {
+					bsonType: "string",
+					description: "must be a string and is required"
+						
+				},
+				text: {
+					bsonType: "string",
+					description: "must be a string and is required"
+					
+				},
+				creator: {
+					bsonType: "object",
+					description: "must be a objectid and and is required"	
+				},
+				comments: {
+					bsonType: "array",
+					description: "must be a objectid and and is required",
+					items: {
+						bsonType: "object",
+						required: ["text", "author"],
+						properties: {
+							text: {
+								bsonType: "string",
+								description: "must be a string and and is required"
+							},
+							author: {
+								bsonType: "object",
+								description: "must be an objectid and is required"
+							}
+						}
+					}
+						
+				}
+				
+			}
+
+		}
+	}
+});
+
+db.posts.findOne()
+
+
+
+//Modifying above schema
+
+db.runCommand({
+	collMod : "posts",
+	validator : {
+		$jsonSchema : {
+			bsonType : "object",
+			required : [ "title", "text", "creator", "comment" ],
+			properties : {
+				title : {
+					bsonType : "string",
+					description : "must be a string and is required"
+
+				},
+				text : {
+					bsonType : "string",
+					description : "must be a string and is required"
+
+				},
+				creator : {
+					bsonType : "object",
+					description : "must be a objectid and and is required"
+				},
+				comments : {
+					bsonType : "array",
+					description : "must be a objectid and and is required",
+					items : {
+						bsonType : "object",
+						required : [ "text", "author" ],
+						properties : {
+							text : {
+								bsonType : "string",
+								description : "must be a string and and is required"
+							},
+							author : {
+								bsonType : "object",
+								description : "must be an objectid and is required"
+							}
+						}
+					}
+
+				}
+
+			}
+
+		}
+	},
+	validationAction : 'warn'
+});
+
+
+db.posts.insertOne({title: "My first Post!", 
+                    text: "This is my first post, I hope you like it!",
+                    tags: ["new", "tech"], 
+                     creator: ObjectId("5fd95a2f2839541cc778f5dc"),
+                     comments: [{text: "I like this posts!", author: 12}]})
+                     
+
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
